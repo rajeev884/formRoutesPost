@@ -1,0 +1,88 @@
+import React, { Component } from "react";
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import TextField from 'material-ui/TextField';
+import RaisedButton from 'material-ui/RaisedButton';
+import {Link} from 'react-router';
+import {Card, CardTitle} from 'material-ui/Card';
+import { createPost } from "../actions/index";
+import {reduxForm} from 'redux-form';
+import { TextValidator, ValidatorForm } from 'react-material-ui-form-validator';
+
+class PostNew extends Component{
+    
+    render(){
+        const {fields:{title,categories,content},handleSubmit}=this.props;
+        return(
+            <div>
+            <MuiThemeProvider>    
+            {/* <form onSubmit={handleSubmit(this.props.createPost)}> */}
+            <ValidatorForm
+                ref="form"
+                onSubmit={handleSubmit(this.props.createPost)}
+            >
+            <Card style={{marginTop:"15px"}}>
+                <CardTitle title="Add a Post" />
+                {/* <TextField
+                 floatingLabelText="Title"
+                 style={{marginLeft:"10px"}}
+                 {...title}
+                 /> */}
+                 <TextValidator
+                    floatingLabelText="Title"
+                    validators={['required',]}
+                    errorMessages={['This field is required']}
+                    style={{marginLeft:"10px"}}
+                    {...title}
+                 />
+                 <br/>
+                {/* <TextField
+                 floatingLabelText="Categories"
+                 style={{marginLeft:"10px"}}
+                 {...categories}
+                 /> */}
+                <TextValidator
+                floatingLabelText="Categories"
+                validators={['required']}
+                errorMessages={['this field is required']}
+                style={{marginLeft:"10px"}}
+                {...categories}
+                />
+                 <br/>
+                {/* <TextField
+                 floatingLabelText="Content"
+                 style={{marginLeft:"10px"}}
+                 multiLine={true}
+                 {...content}
+                 /> */}
+                <TextValidator
+                floatingLabelText="Content"
+                validators={['required']}
+                errorMessages={['this field is required']}
+                style={{marginLeft:"10px"}}
+                multiLine={true}
+                {...content}
+                />
+                 <br/>
+                <RaisedButton 
+                 type='submit'
+                 label="Submit"
+                 primary={true}
+                 style={{margin:"10px"}} 
+                 />
+                <RaisedButton 
+                 label="Cancel" 
+                 secondary={true} 
+                  />
+            </Card>
+            </ValidatorForm>
+            {/* </form> */}
+            </MuiThemeProvider>
+            </div>
+        )
+    }
+}
+
+export default reduxForm({
+    form:'postnewform',
+    fields:['title','categories','content']
+},null,{createPost})(PostNew);

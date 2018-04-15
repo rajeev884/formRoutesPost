@@ -1,0 +1,56 @@
+import React, { Component } from "react";
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import TextField from 'material-ui/TextField';
+import RaisedButton from 'material-ui/RaisedButton';
+import {Link} from 'react-router';
+import {Card, CardTitle} from 'material-ui/Card';
+import { createPost } from "../actions/index";
+import {reduxForm} from 'redux-form';
+class PostNew extends Component{
+    
+    render(){
+        const {fields:{title,categories,content},handleSubmit}=this.props;
+        return(
+            <div>
+            <MuiThemeProvider>    
+            <form onSubmit={handleSubmit(this.props.createPost)}>
+            <Card style={{marginTop:"15px"}}>
+                <CardTitle title="Add a Post" />
+                <TextField
+                 floatingLabelText="Title"
+                 style={{marginLeft:"10px"}}
+                 {...title}
+                 /><br/>
+                <TextField
+                 floatingLabelText="Categories"
+                 style={{marginLeft:"10px"}}
+                 {...categories}
+                 /><br/>
+                <TextField
+                 floatingLabelText="Content"
+                 style={{marginLeft:"10px"}}
+                 multiLine={true}
+                 {...content}
+                 /><br/>
+                <RaisedButton 
+                 type='submit'
+                 label="Submit"
+                 primary={true}
+                 style={{margin:"10px"}} 
+                 />
+                <RaisedButton 
+                 label="Cancel" 
+                 secondary={true} 
+                  />
+            </Card>
+            </form>
+            </MuiThemeProvider>
+            </div>
+        )
+    }
+}
+
+export default reduxForm({
+    form:'postnewform',
+    fields:['title','categories','content']
+},null,{createPost})(PostNew);

@@ -1,86 +1,73 @@
-import React, { Component } from "react";
+import React, { Component,PropTypes } from "react";
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
 import {Link} from 'react-router';
 import {Card, CardTitle} from 'material-ui/Card';
 import { createPost } from "../actions/index";
-import { connect } from "react-redux";
-import { bindActionCreators } from "redux";
-import { TextValidator, ValidatorForm } from 'react-material-ui-form-validator';
-
+import {reduxForm} from 'redux-form';
 class PostNew extends Component{
-    constructor(props) {
-        super(props);
-        this.state = {
-            formData: { title: '', categories: '',  content:''  }
-        };
+    static contextTypes = {
+        router:PropTypes.object
+    };
+    onSubmit(props){
+        this.props.createPost(props).then(()=>{
+            this.context.router.push('/');
+        }).catch(err=>console.log(err));
     }
-    handleChange(event) {
-        const { formData } = this.state;
-        formData[event.target.name] = event.target.value;
-        this.setState({ formData });
-    }
-    onFormSubmit(event){
-        event.preventDefault();
-        this.props.createPost(this.state.formData);
-    }
+    
     render(){
-        const { formData} = this.state;
+        const {fields:{title,categories,content},handleSubmit}=this.props;
+        // console.log(title);
         return(
             <div>
-            <MuiThemeProvider> 
-            <ValidatorForm ref="form"  onSubmit={(event)=>this.onFormSubmit(event)}  >
+            <MuiThemeProvider>    
+            <form onSubmit={handleSubmit(this.onSubmit.bind(this))}>
             <Card style={{marginTop:"15px"}}>
                 <CardTitle title="Add a Post" />
-                <TextValidator
-                    floatingLabelText="Title"
-                    name="title"
-                    onChange={(event)=>this.handleChange(event)}
-                    value={formData.title}
-                    validators={['required']}
-                    errorMessages={['This field is required']}
-                    style={{marginLeft:"10px"}}
-                /><br/>
-                <TextValidator
-                    floatingLabelText="Categories"
-                    name="categories"
-                    onChange={(event)=>this.handleChange(event)}
-                    value={formData.categories}
-                    validators={['required']}
-                    errorMessages={['this field is required']}
-                    style={{marginLeft:"10px"}}
-                /><br/>
-                <TextValidator
-                    floatingLabelText="Content"
-                    name="content"  
-                    onChange={(event)=>this.handleChange(event)}
-                    value={formData.content}                  
-                    validators={['required']}
-                    errorMessages={['this field is required']}
-                    style={{marginLeft:"10px"}}
-                    multiLine={true}
-                /><br/>
-                <RaisedButton 
-                    type='submit'
-                    label="Submit"
-                    primary={true}
-                    style={{margin:"10px"}} 
-                 />
-                <Link to="/"> 
-                <RaisedButton 
-                    label="Cancel" 
-                    secondary={true} 
-                  />
-                </Link>
+                <TextField
+                 floatingLabelText="Title"
+                 className="textfields"
+                 {...title}
+                 errorText={title.touched?title.error:''}
+                 /><br/>
+                <TextField
+                 floatingLabelText="Categories"
+                 className="textfields"
+                 {...categories}
+                 errorText={categories.touched?categories.error:''}
+                 /><br/>
+                <TextField
+                 floatingLabelText="Content"
+                 className="textfields"
+                 multiLine={true}
+                 {...content}
+                 errorText={content.touched?content.error:''}
+                 /><br/>
+                <RaisedButton type='submit' label="Submit" primary={true} style={{margin:"10px"}} />
+                <Link to="/"><RaisedButton label="Cancel"  secondary={true}  /></Link>
             </Card>
-            </ValidatorForm>
+            </form>
             </MuiThemeProvider>
             </div>
         )
     }
 }
-function mapDispatchToProps(dispatch){
-    return bindActionCreators({createPost},dispatch);
+function validate(values){
+    const errors={};
+    if(!values.title){
+        errors.title="Title is required"
+    }
+    if(!values.categories){
+        errors.categories="Categories is required"
+    }
+    if(!values.content){
+        errors.content="Content is required"
+    }
+    return errors;
 }
-export default connect(null,mapDispatchToProps)(PostNew);
+export default reduxForm({
+    form:'postnewform',
+    fields:['title','categories','content'],
+    validate
+},null,{createPost})(PostNew);

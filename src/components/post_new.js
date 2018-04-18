@@ -6,6 +6,21 @@ import {Link} from 'react-router';
 import {Card, CardTitle} from 'material-ui/Card';
 import { createPost } from "../actions/index";
 import {reduxForm} from 'redux-form';
+import _ from 'lodash';
+const FIELDS={
+    title:{
+        type:'text',
+        label:'Title'
+    },
+    categories:{
+        type:'text',
+        label:'Categories'
+    },
+    content:{
+        type:'text',
+        label:'Content'
+    }
+};
 class PostNew extends Component{
     static contextTypes = {
         router:PropTypes.object
@@ -15,35 +30,28 @@ class PostNew extends Component{
             this.context.router.push('/');
         }).catch(err=>console.log(err));
     }
-    
+    renderFields(fieldConfig,field){
+        const fieldHelper=this.props.fields[field];
+       // console.log(fieldConfig,'<fieldConfig',field,'<field',fieldHelper);
+
+        return(<div><TextField
+            floatingLabelText={fieldConfig.label}
+            className="textfields"
+            {...fieldHelper}
+            errorText={fieldHelper.touched?fieldHelper.error:''}
+            multiLine={fieldHelper.name=='content'?true:false}
+            /><br/></div>);
+
+    }
     render(){
-        const {fields:{title,categories,content},handleSubmit}=this.props;
-        // console.log(title);
+        const {handleSubmit}=this.props;
         return(
             <div>
             <MuiThemeProvider>    
             <form onSubmit={handleSubmit(this.onSubmit.bind(this))}>
             <Card style={{marginTop:"15px"}}>
                 <CardTitle title="Add a Post" />
-                <TextField
-                 floatingLabelText="Title"
-                 className="textfields"
-                 {...title}
-                 errorText={title.touched?title.error:''}
-                 /><br/>
-                <TextField
-                 floatingLabelText="Categories"
-                 className="textfields"
-                 {...categories}
-                 errorText={categories.touched?categories.error:''}
-                 /><br/>
-                <TextField
-                 floatingLabelText="Content"
-                 className="textfields"
-                 multiLine={true}
-                 {...content}
-                 errorText={content.touched?content.error:''}
-                 /><br/>
+                {_.map(FIELDS,this.renderFields.bind(this))}
                 <RaisedButton type='submit' label="Submit" primary={true} style={{margin:"10px"}} />
                 <Link to="/"><RaisedButton label="Cancel"  secondary={true}  /></Link>
             </Card>
@@ -55,19 +63,16 @@ class PostNew extends Component{
 }
 function validate(values){
     const errors={};
-    if(!values.title){
-        errors.title="Title is required"
-    }
-    if(!values.categories){
-        errors.categories="Categories is required"
-    }
-    if(!values.content){
-        errors.content="Content is required"
-    }
+    _.each(FIELDS,(type,field)=>{
+       // console.log(values,'vall',type,'typp',field);
+        if(!values[field]){
+            errors[field]=`enter a ${field}`
+        }
+    })
     return errors;
 }
 export default reduxForm({
     form:'postnewform',
-    fields:['title','categories','content'],
+    fields:_.keys(FIELDS),
     validate
 },null,{createPost})(PostNew);
